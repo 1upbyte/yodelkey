@@ -3,7 +3,7 @@ import random
 import threading
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum, auto
 from pathlib import Path
 from urllib.parse import urlparse
@@ -89,7 +89,7 @@ def create_item():
                 parsed = urlparse(content)
                 if parsed.scheme not in ["http", "https"]:
                     return "Invalid URL scheme", 400
-            item = Item(datetime.now(tz="UTC"), item_type, content)
+            item = Item(datetime.now(tz=UTC), item_type, content)
 
         case ItemType.FILE:
             if "file" not in request.files:
@@ -101,7 +101,7 @@ def create_item():
                 return "No/invalid filename", 400
 
             Path.mkdir("./uploads", exist_ok=True)
-            item = Item(datetime.now(tz="UTC"), item_type, safe_filename)
+            item = Item(datetime.now(tz=UTC), item_type, safe_filename)
             file_path = f"./uploads/{item.uuid}"
             file.save(file_path)
 
@@ -118,7 +118,7 @@ def cleanup_old_items():
     """Remove items older than 5 minutes."""
     while True:
         time.sleep(60)
-        current_time = datetime.now(tz="UTC")
+        current_time = datetime.now(tz=UTC)
         keys_to_delete = []
 
         for key, item in items.items():
