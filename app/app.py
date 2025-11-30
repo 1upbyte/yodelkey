@@ -1,6 +1,6 @@
 import random
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import StrEnum, auto
 from uuid import UUID, uuid4
 from typing import Optional
@@ -8,6 +8,8 @@ from flask import Flask, send_file, render_template, redirect, request, jsonify,
 import os
 from urllib.parse import urlparse
 from werkzeug.utils import secure_filename
+import threading
+import time
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
@@ -99,5 +101,33 @@ def create_item():
 
     return key
 
+def cleanup_old_items():
+    """Remove items older than 5 minutes."""
+    while True:
+        time.sleep(60) 
+        current_time = datetime.now()
+        keys_to_delete = []
+        
+        for key, item in items.items():
+            age = current_time - item.creation_time
+            if age >= timedelta(minutes=5):
+                keys_to_delete.append(key)
+                
+                if item.type == ItemType.FILE:
+                    file_path = f"./uploads/{item.uuid}"
+                    try:
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+                    except Exception as e:
+                        print(f"Error deleting file {file_path}: {e}")
+        
+        for key in keys_to_delete:
+            del items[key]
+            word_list.append(key)
+
 if __name__ == "__main__":
+    # Start cleanup thread
+    cleanup_thread = threading.Thread(target=cleanup_old_items, daemon=True)
+    cleanup_thread.start()
+    
     app.run(debug=True)
