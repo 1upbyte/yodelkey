@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShareKey</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea, input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            display: none;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>ShareKey</h1>
+    <form id="shareForm">
+        <div class="form-group">
+            <label>Type:</label>
+            <select id="typeSelect" name="type" required>
+                <option value="url">URL</option>
+                <option value="text">Text</option>
+                <option value="file">File</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="contentGroup">
+            <label id="contentLabel">Content:</label>
+            <textarea id="contentInput" name="content"></textarea>
+        </div>
+
+        <div class="form-group hidden" id="fileGroup">
+            <label>File:</label>
+            <input type="file" id="fileInput" name="file">
+        </div>
+
+        <button type="submit">Create Share Link</button>
+    </form>
+
+    <div id="result" class="result"></div>
+
+    <script>
+        const typeSelect = document.getElementById('typeSelect');
+        const contentGroup = document.getElementById('contentGroup');
+        const fileGroup = document.getElementById('fileGroup');
+        const contentLabel = document.getElementById('contentLabel');
+        const contentInput = document.getElementById('contentInput');
+        const fileInput = document.getElementById('fileInput');
+        const shareForm = document.getElementById('shareForm');
+        const resultDiv = document.getElementById('result');
+
+        typeSelect.addEventListener('change', function() {
+            if (this.value === 'file') {
+                contentGroup.classList.add('hidden');
+                fileGroup.classList.remove('hidden');
+                contentInput.removeAttribute('required');
+                fileInput.setAttribute('required', 'required');
+            } else {
+                contentGroup.classList.remove('hidden');
+                fileGroup.classList.add('hidden');
+                contentInput.setAttribute('required', 'required');
+                fileInput.removeAttribute('required');
+                
+                if (this.value === 'url') {
+                    contentLabel.textContent = 'URL:';
+                    contentInput.placeholder = 'https://example.com';
+                } else {
+                    contentLabel.textContent = 'Text:';
+                    contentInput.placeholder = 'Enter your text here';
+                }
+            }
+        });
+
+        shareForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('type', typeSelect.value);
+            
+            if (typeSelect.value === 'file') {
+                if (fileInput.files.length > 0) {
+                    formData.append('file', fileInput.files[0]);
+                }
+            } else {
+                formData.append('content', contentInput.value);
+            }
+
+            try {
+                const response = await fetch('/create', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.text();
+
+                if (response.ok) {
+                    resultDiv.className = 'result';
+                    resultDiv.style.display = 'block';
+                    const fullUrl = window.location.origin + "/" + data;
+                    resultDiv.innerHTML = `
+                        <strong>Success!</strong><br>
+                        Your share key: <strong>${data}</strong><br>
+                        Link: <a href="${data}" target="_blank">${fullUrl}</a>
+                    `;
+                    shareForm.reset();
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `<strong>Error:</strong> ${data}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<strong>Error:</strong> ${error}`;
+            }
+        });
+    </script>
+</body>
+</html>
