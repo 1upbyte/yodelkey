@@ -1,49 +1,63 @@
+"""Entrypoint for sharekey."""
 import random
+import threading
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import StrEnum, auto
-from uuid import UUID, uuid4
-from typing import Optional
-from flask import Flask, send_file, render_template, redirect, request, jsonify, make_response
-import os
+from pathlib import Path
 from urllib.parse import urlparse
+from uuid import UUID, uuid4
+
+from flask import (
+    Flask,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    send_file,
+)
 from werkzeug.utils import secure_filename
-import threading
-import time
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100MB
 
-with open("words.txt") as f:
+with Path.open("words.txt") as f:
     word_list = f.read().split(",")
 
 class ItemType(StrEnum):
+    """Enum for different types of items."""
+
     URL = auto()
     TEXT = auto()
     FILE = auto()
 
 @dataclass
-class Item():
+class Item:
+    """Item for different types of content."""
+
     creation_time: datetime
     type: ItemType
     content: str
     uuid: UUID = field(default_factory=uuid4)
 
-items: dict[str, Item] = {"test": Item(creation_time=datetime.now(), type=ItemType.TEXT, content="<script>alert('hello')</script>")} 
+items: dict[str, Item] = {}
 
 @app.get("/")
 def root():
+    """Return index page."""
     return render_template("index.html")
 
 @app.get("/404")
 def not_found():
+    """Return 404."""
     return "not found", 404
 
 @app.get("/<key>")
 def handle_key(key: str):
+    """Handle key (redirect, text, or file)."""
     item = items.get(key)
     if item:
-        print(item.type)
         match item.type:
             case ItemType.URL:
                 return redirect(item.content)
@@ -58,13 +72,14 @@ def handle_key(key: str):
 
 @app.route("/create", methods=["POST"])
 def create_item():
+    """Create a new item."""
     item_type_str = request.form.get("type", "").strip().lower()
-    
+
     try:
         item_type = ItemType(item_type_str)
     except ValueError:
         item_type = None
-    
+
     match item_type:
         case ItemType.URL | ItemType.TEXT:
             content = request.form.get("content", "")
@@ -72,30 +87,28 @@ def create_item():
                 return "Content required", 400
             if item_type == ItemType.URL:
                 parsed = urlparse(content)
-                if parsed.scheme not in ['http', 'https']:
+                if parsed.scheme not in ["http", "https"]:
                     return "Invalid URL scheme", 400
-            item = Item(creation_time=datetime.now(), type=item_type, content=content)
+            item = Item(datetime.now(tz="UTC"), item_type, content)
+
         case ItemType.FILE:
-            if 'file' not in request.files:
+            if "file" not in request.files:
                 return "No file provided", 400
-            
-            file = request.files['file']
-            if file.filename == '':
-                return "No file selected", 400
-            
+
+            file = request.files["file"]
             safe_filename = secure_filename(file.filename)
             if not safe_filename:
-                return "Invalid filename", 400
-            
-            os.makedirs("./uploads", exist_ok=True)
-            
-            item = Item(creation_time=datetime.now(), type=item_type, content=safe_filename)
+                return "No/invalid filename", 400
+
+            Path.mkdir("./uploads", exist_ok=True)
+            item = Item(datetime.now(tz="UTC"), item_type, safe_filename)
             file_path = f"./uploads/{item.uuid}"
             file.save(file_path)
+
         case _:
             return "Bad Request", 400
 
-    key = random.choice(word_list)
+    key = random.choice(word_list)  # noqa: S311
     word_list.remove(key)
     items[key] = item
 
@@ -104,30 +117,23 @@ def create_item():
 def cleanup_old_items():
     """Remove items older than 5 minutes."""
     while True:
-        time.sleep(60) 
-        current_time = datetime.now()
+        time.sleep(60)
+        current_time = datetime.now(tz="UTC")
         keys_to_delete = []
-        
+
         for key, item in items.items():
             age = current_time - item.creation_time
             if age >= timedelta(minutes=5):
                 keys_to_delete.append(key)
-                
+
                 if item.type == ItemType.FILE:
                     file_path = f"./uploads/{item.uuid}"
-                    try:
-                        if os.path.exists(file_path):
-                            os.remove(file_path)
-                    except Exception as e:
-                        print(f"Error deleting file {file_path}: {e}")
-        
+                    Path.unlink(file_path, missing_ok=True)
+
         for key in keys_to_delete:
             del items[key]
             word_list.append(key)
 
 if __name__ == "__main__":
-    # Start cleanup thread
     cleanup_thread = threading.Thread(target=cleanup_old_items, daemon=True)
     cleanup_thread.start()
-    
-    app.run(debug=True)

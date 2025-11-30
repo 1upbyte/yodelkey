@@ -12,3 +12,7 @@ dependencies = [
 dev = [
     "fastapi[standard]>=0.122.0",
 ]
+
+[tool.ruff]
+lint.select = ["ALL"]
+lint.ignore = ["ANN201", "INP001"]
