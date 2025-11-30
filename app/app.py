@@ -6,6 +6,8 @@ from uuid import UUID, uuid4
 from typing import Optional
 from flask import Flask, send_file, render_template, redirect, request, jsonify, make_response
 import os
+from urllib.parse import urlparse
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
@@ -63,7 +65,14 @@ def create_item():
     
     match item_type:
         case ItemType.URL | ItemType.TEXT:
-            item = Item(creation_time=datetime.now(), type=item_type, content=request.form.get("content"))
+            content = request.form.get("content", "")
+            if not content:
+                return "Content required", 400
+            if item_type == ItemType.URL:
+                parsed = urlparse(content)
+                if parsed.scheme not in ['http', 'https']:
+                    return "Invalid URL scheme", 400
+            item = Item(creation_time=datetime.now(), type=item_type, content=content)
         case ItemType.FILE:
             if 'file' not in request.files:
                 return "No file provided", 400
@@ -72,21 +81,21 @@ def create_item():
             if file.filename == '':
                 return "No file selected", 400
             
+            safe_filename = secure_filename(file.filename)
+            if not safe_filename:
+                return "Invalid filename", 400
+            
             os.makedirs("./uploads", exist_ok=True)
             
-            item = Item(creation_time=datetime.now(), type=item_type, content=file.filename)
+            item = Item(creation_time=datetime.now(), type=item_type, content=safe_filename)
             file_path = f"./uploads/{item.uuid}"
             file.save(file_path)
         case _:
             return "Bad Request", 400
 
-    random_index = random.randint(0, len(word_list) - 1)
-    key = word_list[random_index]
+    key = random.choice(word_list)
     word_list.remove(key)
-
     items[key] = item
-
-    print(items[key])
 
     return key
 
