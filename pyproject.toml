@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "flask>=3.1.2",
-    "werkzeug==3.14"
+    "werkzeug>=3.1.4"
 ]
 
 [tool.ruff]

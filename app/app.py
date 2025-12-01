@@ -49,6 +49,11 @@ def root():
     """Return index page."""
     return render_template("index.html")
 
+@app.get("/favicon.ico")
+def favicon():
+    """Give the favicon."""
+    return send_file("./static/favicon.ico")
+
 @app.get("/404")
 def not_found():
     """Return 404."""
