@@ -3,85 +3,314 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShareKey</title>
+    <title>YodelKey</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"], textarea, input[type="file"] {
-            width: 100%;
-            padding: 8px;
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
-        textarea {
-            min-height: 100px;
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
         }
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: #252541;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #a8d8ea;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #9e9e9e;
+            margin-bottom: 40px;
+            font-size: 0.95rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            border-bottom: 2px solid #3a3a5a;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 16px;
+            background: transparent;
             border: none;
+            border-bottom: 3px solid transparent;
+            color: #9e9e9e;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            bottom: -2px;
+        }
+
+        .tab:hover {
+            color: #b0b0b0;
+        }
+
+        .tab.active {
+            color: #a8d8ea;
+            border-bottom-color: #a8d8ea;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        select, input[type="text"], textarea, input[type="file"] {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1a1a2e;
+            border: 2px solid #3a3a5a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        select:focus, input[type="text"]:focus, textarea:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #a8d8ea;
+            box-shadow: 0 0 0 3px rgba(168, 216, 234, 0.1);
+        }
+
+        select:hover, input[type="text"]:hover, textarea:hover {
+            border-color: #4a4a6a;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        input[type="file"] {
+            padding: 10px;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #0056b3;
+
+        input[type="file"]::file-selector-button {
+            background: #a8d8ea;
+            color: #1a1a2e;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 12px;
         }
+
+        input[type="file"]::file-selector-button:hover {
+            background: #8fc8de;
+            transform: translateY(-1px);
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #a8d8ea 0%, #8fc8de 100%);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(168, 216, 234, 0.3);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(0);
+        }
+
         .result {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #a8d8ea;
+            background: rgba(168, 216, 234, 0.1);
             display: none;
+            animation: slideIn 0.3s ease;
         }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result strong {
+            color: #a8d8ea;
+        }
+
+        .result a {
+            color: #a8d8ea;
+            text-decoration: none;
+            word-break: break-all;
+            transition: color 0.3s ease;
+        }
+
+        .result a:hover {
+            color: #8fc8de;
+            text-decoration: underline;
+        }
+
         .error {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
+            background: rgba(255, 107, 107, 0.1);
+            border-left-color: #ff6b6b;
         }
+
+        .error strong {
+            color: #ff6b6b;
+        }
+
         .hidden {
             display: none;
+        }
+
+        .share-key {
+            display: inline-block;
+            background: #1a1a2e;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: #a8d8ea;
+            margin: 8px 0;
+        }
+
+        .file-info {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #9e9e9e;
+        }
+
+        .file-error {
+            color: #ff6b6b;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 24px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 0.85rem;
+            }
+
+            .tab {
+                font-size: 0.9rem;
+                padding: 10px 12px;
+            }
+
+            select, input[type="text"], textarea, input[type="file"] {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+
+        @media (max-width: 400px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 24px 20px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .tab {
+                font-size: 0.85rem;
+                padding: 8px 8px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>ShareKey</h1>
-    <form id="shareForm">
-        <div class="form-group">
-            <label>Type:</label>
-            <select id="typeSelect" name="type" required>
-                <option value="url">URL</option>
-                <option value="text">Text</option>
-                <option value="file">File</option>
-            </select>
+    <div class="container">
+        <h1>YodelKey</h1>
+        <p class="subtitle">Share URLs, text, and files with ease</p>
+        
+        <div class="tabs">
+            <button type="button" class="tab active" data-type="url">URL</button>
+            <button type="button" class="tab" data-type="text">Text</button>
+            <button type="button" class="tab" data-type="file">File</button>
         </div>
 
-        <div class="form-group" id="contentGroup">
-            <label id="contentLabel">Content:</label>
-            <textarea id="contentInput" name="content"></textarea>
-        </div>
+        <form id="shareForm">
+            <input type="hidden" id="typeInput" name="type" value="url">
 
-        <div class="form-group hidden" id="fileGroup">
-            <label>File:</label>
-            <input type="file" id="fileInput" name="file">
-        </div>
+            <div class="form-group" id="contentGroup">
+                <label id="contentLabel" for="contentInput">URL</label>
+                <textarea id="contentInput" name="content" placeholder="https://example.com" required></textarea>
+            </div>
 
-        <button type="submit">Create Share Link</button>
-    </form>
+            <div class="form-group hidden" id="fileGroup">
+                <label for="fileInput">Choose a file</label>
+                <input type="file" id="fileInput" name="file">
+                <div id="fileInfo" class="file-info"></div>
+            </div>
 
-    <div id="result" class="result"></div>
+            <button type="submit">Create Share Link</button>
+        </form>
+
+        <div id="result" class="result"></div>
+    </div>
 
     <script>
-        const typeSelect = document.getElementById('typeSelect');
+        const tabs = document.querySelectorAll('.tab');
+        const typeInput = document.getElementById('typeInput');
         const contentGroup = document.getElementById('contentGroup');
         const fileGroup = document.getElementById('fileGroup');
         const contentLabel = document.getElementById('contentLabel');
@@ -89,26 +318,56 @@
         const fileInput = document.getElementById('fileInput');
         const shareForm = document.getElementById('shareForm');
         const resultDiv = document.getElementById('result');
+        const fileInfo = document.getElementById('fileInfo');
 
-        typeSelect.addEventListener('change', function() {
-            if (this.value === 'file') {
-                contentGroup.classList.add('hidden');
-                fileGroup.classList.remove('hidden');
-                contentInput.removeAttribute('required');
-                fileInput.setAttribute('required', 'required');
-            } else {
-                contentGroup.classList.remove('hidden');
-                fileGroup.classList.add('hidden');
-                contentInput.setAttribute('required', 'required');
-                fileInput.removeAttribute('required');
-                
-                if (this.value === 'url') {
-                    contentLabel.textContent = 'URL:';
-                    contentInput.placeholder = 'https://example.com';
+        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB in bytes
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const type = this.dataset.type;
+                typeInput.value = type;
+
+                if (type === 'file') {
+                    contentGroup.classList.add('hidden');
+                    fileGroup.classList.remove('hidden');
+                    contentInput.removeAttribute('required');
+                    fileInput.setAttribute('required', 'required');
                 } else {
-                    contentLabel.textContent = 'Text:';
-                    contentInput.placeholder = 'Enter your text here';
+                    contentGroup.classList.remove('hidden');
+                    fileGroup.classList.add('hidden');
+                    contentInput.setAttribute('required', 'required');
+                    fileInput.removeAttribute('required');
+                    
+                    if (type === 'url') {
+                        contentLabel.textContent = 'URL';
+                        contentInput.placeholder = 'https://example.com';
+                    } else {
+                        contentLabel.textContent = 'Text';
+                        contentInput.placeholder = 'Enter your text here...';
+                    }
                 }
+            });
+        });
+
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                
+                if (file.size > MAX_FILE_SIZE) {
+                    fileInfo.textContent = `File too large: ${fileSizeMB} MB (max 100 MB)`;
+                    fileInfo.classList.add('file-error');
+                } else {
+                    fileInfo.textContent = `Selected: ${file.name} (${fileSizeMB} MB)`;
+                    fileInfo.classList.remove('file-error');
+                }
+            } else {
+                fileInfo.textContent = '';
+                fileInfo.classList.remove('file-error');
             }
         });
 
@@ -116,11 +375,20 @@
             e.preventDefault();
             
             const formData = new FormData();
-            formData.append('type', typeSelect.value);
+            formData.append('type', typeInput.value);
             
-            if (typeSelect.value === 'file') {
+            if (typeInput.value === 'file') {
                 if (fileInput.files.length > 0) {
-                    formData.append('file', fileInput.files[0]);
+                    const file = fileInput.files[0];
+                    
+                    if (file.size > MAX_FILE_SIZE) {
+                        resultDiv.className = 'result error';
+                        resultDiv.style.display = 'block';
+                        resultDiv.innerHTML = '<strong>Error:</strong> File size exceeds 100 MB limit';
+                        return;
+                    }
+                    
+                    formData.append('file', file);
                 }
             } else {
                 formData.append('content', contentInput.value);
@@ -139,11 +407,13 @@
                     resultDiv.style.display = 'block';
                     const fullUrl = window.location.origin + "/" + data;
                     resultDiv.innerHTML = `
-                        <strong>Success!</strong><br>
-                        Your share key: <strong>${data}</strong><br>
-                        Link: <a href="${data}" target="_blank">${fullUrl}</a>
+                        <strong>Success!</strong><br><br>
+                        Share key: <span class="share-key">${data}</span><br><br>
+                        <a href="${data}" target="_blank">${fullUrl}</a>
                     `;
                     shareForm.reset();
+                    typeInput.value = 'url';
+                    fileInfo.textContent = '';
                 } else {
                     resultDiv.className = 'result error';
                     resultDiv.style.display = 'block';

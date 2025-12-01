@@ -1,16 +1,12 @@
 [project]
-name = "sharekey"
-version = "0.1.0"
-description = "Add your description here"
+name = "YodelKey"
+version = "1.0.0"
+description = "share links & more with a yodel"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "flask>=3.1.2",
-]
-
-[dependency-groups]
-dev = [
-    "fastapi[standard]>=0.122.0",
+    "werkzeug==3.14"
 ]
 
 [tool.ruff]

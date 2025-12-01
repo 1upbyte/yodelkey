@@ -17,6 +17,7 @@ from flask import (
     request,
     send_file,
 )
+from werkzeug.serving import run_simple
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -100,7 +101,7 @@ def create_item():
             if not safe_filename:
                 return "No/invalid filename", 400
 
-            Path.mkdir("./uploads", exist_ok=True)
+            Path.mkdir(Path("./uploads"), exist_ok=True)
             item = Item(datetime.now(tz=UTC), item_type, safe_filename)
             file_path = f"./uploads/{item.uuid}"
             file.save(file_path)
@@ -137,3 +138,5 @@ def cleanup_old_items():
 if __name__ == "__main__":
     cleanup_thread = threading.Thread(target=cleanup_old_items, daemon=True)
     cleanup_thread.start()
+    run_simple("0.0.0.0", 5000, app)  # noqa: S104
+
