@@ -73,7 +73,8 @@ def handle_key(key: str):
                 return response
             case ItemType.FILE:
                 file_path = f"./uploads/{item.uuid}"
-                return send_file(file_path, download_name=item.content)
+                return send_file(file_path, download_name=item.content,
+                                 as_attachment=True)
     return redirect("/404")
 
 @app.route("/create", methods=["POST"])
