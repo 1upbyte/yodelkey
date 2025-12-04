@@ -91,7 +91,7 @@
         }
 
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 0;
             min-height: 140px;
         }
 
@@ -163,7 +163,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 8px;
+            margin-top: 0;
         }
 
         button[type="submit"]:hover {
@@ -231,9 +231,40 @@
             padding: 4px 12px;
             border-radius: 6px;
             font-family: 'Courier New', monospace;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #a8d8ea;
-            margin: 8px 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            color: #9e9e9e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .result-content {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .result-link {
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+
+        .copy-hint {
+            font-size: 0.7rem;
+            color: #7e7e9e;
+            margin-top: 6px;
         }
 
         .file-info {
@@ -312,7 +343,7 @@
 <body>
     <div class="container">
         <h1>YodelKey</h1>
-        <p class="subtitle">Share URLs, text, and files with ease</p>
+        <p class="subtitle">Share URLs, text, and files with a yodel</p>
         
         <div class="tabs">
             <button type="button" class="tab active" data-type="url">URL</button>
@@ -343,6 +374,7 @@
             <div class="notice">
                 Items are automatically deleted after 5 minutes.<br>Do not share sensitive information.
             </div>
+            <a href="https://github.com/1upbyte/yodelkey" target="_blank" rel="noopener noreferrer">Made by Pablo Comino (@1upbyte)</a><br>
             Inspired by <a href="https://www.yellkey.com" target="_blank" rel="noopener noreferrer">yellkey.com</a>
         </div>
     </div>
@@ -446,9 +478,17 @@
                     resultDiv.style.display = 'block';
                     const fullUrl = window.location.origin + "/" + data;
                     resultDiv.innerHTML = `
-                        <strong>Success!</strong><br><br>
-                        Share key: <span class="share-key">${data}</span><br><br>
-                        <a href="${data}" target="_blank">${fullUrl}</a>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <strong style="font-size: 0.9rem;">Share link created</strong>
+                            <span class="copy-hint" style="margin: 0;">Expires in 5 minutes</span>
+                        </div>
+                        <div class="result-content">
+                            <span class="result-label">Key:</span>
+                            <span class="share-key">${data}</span>
+                        </div>
+                        <div class="result-link">
+                            <a href="${data}" target="_blank">${fullUrl}</a>
+                        </div>
                     `;
                     shareForm.reset();
                     typeInput.value = 'url';
