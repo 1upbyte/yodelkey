@@ -424,6 +424,14 @@
             });
         });
 
+        // Handle Enter key: submit on URL tab, allow newlines on Text tab
+        contentInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && typeInput.value === 'url') {
+                e.preventDefault();
+                shareForm.requestSubmit();
+            }
+        });
+
         fileInput.addEventListener('change', function() {
             if (this.files.length > 0) {
                 const file = this.files[0];
