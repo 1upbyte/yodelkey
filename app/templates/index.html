@@ -56,7 +56,7 @@
             max-height: 95vh;
             background: #252541;
             border-radius: 16px;
-            padding: 10px 40px 40px 40px;
+            padding: 10px 40px 20px 40px;
             overflow-y: auto;
         }
 
@@ -118,15 +118,7 @@
 
         .form-group {
             margin-bottom: 0;
-            min-height: 140px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #b0b0b0;
-            font-size: 0.9rem;
+            min-height: 40px;
         }
 
         select, input[type="text"], textarea, input[type="file"] {
@@ -152,8 +144,8 @@
         }
 
         textarea {
-            min-height: 80px;
             resize: vertical;
+            height: auto;
         }
 
         input[type="file"] {
@@ -189,7 +181,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 0;
+            margin-top: 8px;
         }
 
         button[type="submit"]:hover {
@@ -546,12 +538,10 @@
             <input type="hidden" id="typeInput" name="type" value="url">
 
             <div class="form-group" id="contentGroup">
-                <label id="contentLabel" for="contentInput">URL</label>
-                <textarea id="contentInput" name="content" placeholder="https://example.com" required></textarea>
+                <textarea id="contentInput" name="content" placeholder="https://example.com" required rows="1"></textarea>
             </div>
 
             <div class="form-group hidden" id="fileGroup">
-                <label for="fileInput">Choose a file</label>
                 <input type="file" id="fileInput" name="file">
                 <div id="fileInfo" class="file-info"></div>
                 <div id="uploadProgress" class="upload-progress">
@@ -581,7 +571,6 @@
         const typeInput = document.getElementById('typeInput');
         const contentGroup = document.getElementById('contentGroup');
         const fileGroup = document.getElementById('fileGroup');
-        const contentLabel = document.getElementById('contentLabel');
         const contentInput = document.getElementById('contentInput');
         const fileInput = document.getElementById('fileInput');
         const shareForm = document.getElementById('shareForm');
@@ -611,10 +600,8 @@
                     fileInput.removeAttribute('required');
                     
                     if (type === 'url') {
-                        contentLabel.textContent = 'URL';
                         contentInput.placeholder = 'https://example.com';
                     } else {
-                        contentLabel.textContent = 'Text';
                         contentInput.placeholder = 'Enter your text here...';
                     }
                 }
