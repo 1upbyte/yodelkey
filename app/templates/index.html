@@ -374,6 +374,38 @@
             color: #ff6b6b;
         }
 
+        .upload-progress {
+            margin-top: 12px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .upload-progress.active {
+            display: block;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #1a1a2e;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #a8d8ea 0%, #8fc8de 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            color: #9e9e9e;
+            text-align: center;
+        }
+
         .footer {
             margin-top: 16px;
             padding-top: 16px;
@@ -461,6 +493,12 @@
                 <label for="fileInput">Choose a file</label>
                 <input type="file" id="fileInput" name="file">
                 <div id="fileInfo" class="file-info"></div>
+                <div id="uploadProgress" class="upload-progress">
+                    <div class="progress-bar-container">
+                        <div id="progressBar" class="progress-bar"></div>
+                    </div>
+                    <div id="progressText" class="progress-text">Uploading...</div>
+                </div>
             </div>
 
             <button type="submit">Create Share Link</button>
@@ -572,12 +610,54 @@
             }
 
             try {
-                const response = await fetch('/create', {
-                    method: 'POST',
-                    body: formData
+                // Show progress bar for file uploads
+                const uploadProgress = document.getElementById('uploadProgress');
+                const progressBar = document.getElementById('progressBar');
+                const progressText = document.getElementById('progressText');
+                
+                if (typeInput.value === 'file') {
+                    uploadProgress.classList.add('active');
+                }
+
+                const xhr = new XMLHttpRequest();
+                
+                // Track upload progress
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                        progressText.textContent = `Uploading... ${Math.round(percentComplete)}%`;
+                    }
+                });
+                
+                // Handle response
+                const response = await new Promise((resolve, reject) => {
+                    xhr.onload = () => {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            resolve({
+                                ok: true,
+                                text: () => Promise.resolve(xhr.responseText)
+                            });
+                        } else {
+                            resolve({
+                                ok: false,
+                                text: () => Promise.resolve(xhr.responseText)
+                            });
+                        }
+                    };
+                    xhr.onerror = () => reject(new Error('Network error'));
+                    
+                    xhr.open('POST', '/create');
+                    xhr.send(formData);
                 });
 
                 const data = await response.text();
+                
+                // Update progress bar to show completion
+                if (typeInput.value === 'file') {
+                    progressBar.style.width = '100%';
+                    progressText.textContent = 'Upload complete!';
+                }
 
                 if (response.ok) {
                     resultDiv.className = 'result';
@@ -622,15 +702,22 @@
                         showQRModal(fullUrl);
                     });
                     
-                    shareForm.reset();
-                    typeInput.value = 'url';
-                    fileInfo.textContent = '';
                 } else {
                     resultDiv.className = 'result error';
                     resultDiv.style.display = 'block';
                     resultDiv.innerHTML = `<strong>Error:</strong> ${data}`;
                 }
             } catch (error) {
+                // Update progress bar to show error
+                const uploadProgress = document.getElementById('uploadProgress');
+                const progressBar = document.getElementById('progressBar');
+                const progressText = document.getElementById('progressText');
+                
+                if (uploadProgress.classList.contains('active')) {
+                    progressBar.style.width = '0%';
+                    progressText.textContent = 'Upload failed';
+                }
+                
                 resultDiv.className = 'result error';
                 resultDiv.style.display = 'block';
                 resultDiv.innerHTML = `<strong>Error:</strong> ${error}`;
