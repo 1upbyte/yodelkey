@@ -96,7 +96,7 @@ def create_item():
                 parsed = urlparse(content)
                 if parsed.scheme not in ["http", "https"]:
                     return "Invalid URL scheme", 400
-            item = Item(datetime.now(tz=UTC), item_type, content)
+            item = Item(datetime.now(tz=UTC), item_type, parsed.geturl())
 
         case ItemType.FILE:
             if "file" not in request.files:
