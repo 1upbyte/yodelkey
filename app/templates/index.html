@@ -261,6 +261,103 @@
             font-size: 0.85rem;
         }
 
+        .result-main {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .result-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .result-qr {
+            flex-shrink: 0;
+        }
+
+        #qrcode {
+            background: white;
+            padding: 4px;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        #qrcode:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(168, 216, 234, 0.4);
+        }
+
+        #qrcode:hover::after {
+            content: 'Click to enlarge';
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .qr-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease, background 0.3s ease;
+        }
+
+        .qr-modal.active {
+            background: rgba(0, 0, 0, 0.9);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .qr-modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            max-width: 90vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            transform: scale(0.7);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .qr-modal.active .qr-modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .qr-modal-close {
+            color: #9e9e9e;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        #qrcodeLarge {
+            background: white;
+        }
+
         .copy-hint {
             font-size: 0.7rem;
             color: #7e7e9e;
@@ -339,6 +436,7 @@
             }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -490,14 +588,40 @@
                             <strong style="font-size: 0.9rem;">Share link created</strong>
                             <span class="copy-hint" style="margin: 0;">Expires in 5 minutes</span>
                         </div>
-                        <div class="result-content">
-                            <span class="result-label">Key:</span>
-                            <span class="share-key">${data}</span>
-                        </div>
-                        <div class="result-link">
-                            <a href="${data}" target="_blank">${fullUrl}</a>
+                        <div class="result-main">
+                            <div class="result-text">
+                                <div class="result-content">
+                                    <span class="result-label">Key:</span>
+                                    <span class="share-key">${data}</span>
+                                </div>
+                                <div class="result-link">
+                                    <a href="${data}" target="_blank">${fullUrl}</a>
+                                </div>
+                            </div>
+                            <div class="result-qr">
+                                <div id="qrcode"></div>
+                            </div>
                         </div>
                     `;
+                    
+                    // Generate QR code
+                    new QRCode(document.getElementById('qrcode'), {
+                        text: fullUrl,
+                        width: 80,
+                        height: 80,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    
+                    // Add logo to QR code
+                    addLogoToQR('qrcode', 16);
+                    
+                    // Add click handler for fullscreen QR code
+                    document.getElementById('qrcode').addEventListener('click', function() {
+                        showQRModal(fullUrl);
+                    });
+                    
                     shareForm.reset();
                     typeInput.value = 'url';
                     fileInfo.textContent = '';
@@ -512,6 +636,78 @@
                 resultDiv.innerHTML = `<strong>Error:</strong> ${error}`;
             }
         });
+
+        function showQRModal(url) {
+            // Create modal if it doesn't exist
+            let modal = document.getElementById('qrModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'qrModal';
+                modal.className = 'qr-modal';
+                modal.innerHTML = `
+                    <div class="qr-modal-content" onclick="event.stopPropagation()">
+                        <div id="qrcodeLarge"></div>
+                        <div class="qr-modal-close">Click outside to close</div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                // Close modal on click
+                modal.addEventListener('click', function() {
+                    modal.classList.remove('active');
+                    // Clear QR code after animation completes
+                    setTimeout(() => {
+                        document.getElementById('qrcodeLarge').innerHTML = '';
+                    }, 300);
+                });
+            }
+            
+            // Clear previous QR code
+            document.getElementById('qrcodeLarge').innerHTML = '';
+            
+            // Generate large QR code
+            new QRCode(document.getElementById('qrcodeLarge'), {
+                text: url,
+                width: 300,
+                height: 300,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            // Add logo to large QR code
+            addLogoToQR('qrcodeLarge', 60);
+            
+            // Show modal with animation
+            // Use requestAnimationFrame to ensure the transition is triggered
+            requestAnimationFrame(() => {
+                modal.classList.add('active');
+            });
+        }
+
+        function addLogoToQR(containerId, logoSize) {
+            const container = document.getElementById(containerId);
+            const canvas = container.querySelector('canvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+                const centerX = (canvas.width - logoSize) / 2;
+                const centerY = (canvas.height - logoSize) / 2;
+                
+                // Draw white background circle
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, logoSize / 2 + 2, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Draw logo
+                ctx.drawImage(img, centerX, centerY, logoSize, logoSize);
+            };
+            img.src = '/favicon.ico';
+        }
     </script>
 </body>
 </html>
