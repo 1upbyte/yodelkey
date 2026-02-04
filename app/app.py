@@ -77,11 +77,19 @@ def handle_key(key: str):
                                  as_attachment=True)
     return redirect("/404")
 
-@app.route("/create", methods=["POST"])
+@app.route("/create", methods=["GET", "POST"])
 def create_item():
     """Create a new item."""
-    item_type_str = request.form.get("type", "").strip().lower()
 
+    item_type_str = ""
+
+    if request.method == "POST":
+        item_type_str = request.form.get("type", "").strip().lower()
+    if request.method == "GET":
+        if request.args.get("text"):
+            item_type_str = "text"
+        elif request.args.get("url"):
+            item_type_str = "url"
     try:
         item_type = ItemType(item_type_str)
     except ValueError:
@@ -89,7 +97,10 @@ def create_item():
 
     match item_type:
         case ItemType.URL | ItemType.TEXT:
-            content = request.form.get("content", "")
+            if request.method == "GET":
+                content = request.args.get(item_type_str, "")
+            else:
+                content = request.form.get("content", "")
             if not content:
                 return "Content required", 400
             if item_type == ItemType.URL:
@@ -120,7 +131,7 @@ def create_item():
     word_list.remove(key)
     items[key] = item
 
-    return key
+    return key + "\n"
 
 def cleanup_old_items():
     """Remove items older than 5 minutes."""
