@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YodelKey — Settings</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <div class="container">
+        <h1>YodelKey Settings</h1>
+        <p class="subtitle">Configure your YodelKey server connection</p>
+
+        <form id="optionsForm">
+            <label for="serverUrl">Server URL</label>
+            <input
+                type="text"
+                id="serverUrl"
+                name="serverUrl"
+                placeholder="http://localhost:5000"
+                spellcheck="false"
+                autocomplete="off"
+            >
+            <p class="hint">
+                The base URL of your running YodelKey server, e.g.
+                <code>http://localhost:5000</code> for local use or
+                <code>https://yodelkey.example.com</code> for a hosted instance.
+            </p>
+
+            <button type="submit">Save Settings</button>
+        </form>
+
+        <div id="statusMsg" class="status-msg hidden"></div>
+    </div>
+    <script src="options.js"></script>
+</body>
+</html>

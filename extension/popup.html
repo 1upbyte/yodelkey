@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YodelKey</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <h1>YodelKey</h1>
+        <p class="subtitle">Share URLs, text, and files with a yodel</p>
+
+        <div class="tabs">
+            <button type="button" class="tab active" data-type="url">URL</button>
+            <button type="button" class="tab" data-type="text">Text</button>
+            <button type="button" class="tab" data-type="file">File</button>
+            <button type="button" class="tab" data-type="retrieve">Retrieve</button>
+        </div>
+
+        <!-- Share panels (URL / Text / File) -->
+        <div id="sharePanel">
+            <form id="shareForm">
+                <input type="hidden" id="typeInput" name="type" value="url">
+
+                <div class="form-group" id="contentGroup">
+                    <textarea id="contentInput" name="content" placeholder="https://example.com" required rows="1"></textarea>
+                </div>
+
+                <div class="form-group hidden" id="fileGroup">
+                    <input type="file" id="fileInput" name="file">
+                    <div id="fileInfo" class="file-info"></div>
+                    <div id="uploadProgress" class="upload-progress">
+                        <div class="progress-bar-container">
+                            <div id="progressBar" class="progress-bar"></div>
+                        </div>
+                        <div id="progressText" class="progress-text">Uploading...</div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn">Create Share Link</button>
+            </form>
+
+            <div id="result" class="result"></div>
+        </div>
+
+        <!-- Retrieve panel -->
+        <div id="retrievePanel" class="hidden">
+            <form id="retrieveForm">
+                <div class="form-group">
+                    <input
+                        type="text"
+                        id="keyInput"
+                        placeholder="Enter word key, e.g. apple"
+                        spellcheck="false"
+                        autocomplete="off"
+                    >
+                </div>
+                <button type="submit" id="retrieveBtn">Open Link</button>
+            </form>
+            <div id="retrieveError" class="result error hidden"></div>
+        </div>
+
+        <div class="footer">
+            <div class="notice">
+                Items are automatically deleted after 5 minutes.<br>
+                Do not share sensitive information.
+            </div>
+            <a href="https://github.com/1upbyte/yodelkey" target="_blank" rel="noopener noreferrer">Made by Pablo Comino (github/1upbyte)</a><br>
+            Inspired by <a href="https://www.yellkey.com" target="_blank" rel="noopener noreferrer">yellkey.com</a>
+        </div>
+    </div>
+
+    <div id="qrModal" class="qr-modal">
+        <div class="qr-modal-content" id="qrModalContent">
+            <div id="qrcodeLarge"></div>
+            <div class="qr-modal-close">Click outside to close</div>
+        </div>
+    </div>
+
+    <script src="lib/qrcode.min.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>

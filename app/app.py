@@ -23,6 +23,21 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100MB
 
+
+@app.after_request
+def add_cors_headers(response):
+    """Allow browser extensions (and any origin) to call this API."""
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return response
+
+
+@app.route("/create", methods=["OPTIONS"])
+def create_preflight():
+    """Handle CORS preflight for /create."""
+    return "", 204
+
 with Path.open("words.txt") as f:
     word_list = f.read().split(",")
 
