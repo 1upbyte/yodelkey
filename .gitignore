@@ -217,3 +217,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Un-ignore bundled extension dependencies
+!extension/lib/
+!extension/lib/**

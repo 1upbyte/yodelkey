@@ -1,0 +1,31 @@
+# ── Default: normalize all text files to LF on commit ─────────────────────────
+* text=auto eol=lf
+
+# ── Explicitly text: always LF, never CRLF ────────────────────────────────────
+*.html      text eol=lf
+*.css       text eol=lf
+*.js        text eol=lf
+*.json      text eol=lf
+*.py        text eol=lf
+*.txt       text eol=lf
+*.md        text eol=lf
+*.toml      text eol=lf
+*.lock      text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.sh        text eol=lf
+
+# ── Explicitly binary: no line-ending conversion, no diff mangling ─────────────
+*.png    binary
+*.ico    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.webp   binary
+*.svg    binary
+*.pdf    binary
+*.zip    binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.eot    binary
