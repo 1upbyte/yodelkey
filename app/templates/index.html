@@ -656,9 +656,9 @@
 
             const mimeParts = clipboardFile.type.split('/');
             const rawSubtype = mimeParts.length > 1 && mimeParts[1] ? mimeParts[1] : '';
-            const extension = rawSubtype.split(';')[0] || 'bin';
+            const extension = (rawSubtype.split(';')[0] || 'bin');
             const uniquePart = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-            const filename = clipboardFile.name || `pasted-image-${uniquePart}.${extension}`;
+            const filename = `pasted-image-${uniquePart}.${extension}`;
             const imageFile = new File([clipboardFile], filename, { type: clipboardFile.type });
 
             const dataTransfer = new DataTransfer();
