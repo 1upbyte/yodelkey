@@ -578,6 +578,7 @@
         const fileInfo = document.getElementById('fileInfo');
 
         const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB in bytes
+        const RANDOM_FALLBACK_RANGE = 1_000_000;
 
         function setActiveTab(type) {
             tabs.forEach(tab => {
@@ -674,13 +675,13 @@
                 'image/bmp': 'bmp',
                 'image/svg+xml': 'svg',
             };
-            const mimeType = clipboardFile.type.split(';')[0].trim();
+            const mimeType = clipboardFile.type.split(';')[0].trim() || 'image/png';
             const extension = mimeToExt[mimeType] || 'png';
             const uniquePart = typeof crypto.randomUUID === 'function'
                 ? crypto.randomUUID()
-                : `${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+                : `${Date.now()}-${Math.floor(Math.random() * RANDOM_FALLBACK_RANGE)}`;
             const filename = `pasted-image-${uniquePart}.${extension}`;
-            const imageFile = new File([clipboardFile], filename, { type: clipboardFile.type });
+            const imageFile = new File([clipboardFile], filename, { type: mimeType });
 
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(imageFile);
