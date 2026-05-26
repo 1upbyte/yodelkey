@@ -639,7 +639,9 @@
 
         document.addEventListener('paste', function(e) {
             const clipboardItems = e.clipboardData?.items || [];
-            const imageItem = Array.from(clipboardItems).find(item => item.type.startsWith('image/'));
+            const imageItem = Array.from(clipboardItems).find(item =>
+                typeof item.type === 'string' && item.type.startsWith('image/')
+            );
             if (!imageItem) {
                 return;
             }
@@ -652,7 +654,8 @@
             e.preventDefault();
             setActiveTab('file');
 
-            const extension = clipboardFile.type.split('/')[1] || 'png';
+            const mimeParts = clipboardFile.type.split('/');
+            const extension = mimeParts.length > 1 && mimeParts[1] ? mimeParts[1] : 'bin';
             const filename = clipboardFile.name || `pasted-image-${Date.now()}.${extension}`;
             const imageFile = new File([clipboardFile], filename, { type: clipboardFile.type });
 
