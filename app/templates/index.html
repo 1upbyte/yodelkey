@@ -655,8 +655,10 @@
             setActiveTab('file');
 
             const mimeParts = clipboardFile.type.split('/');
-            const extension = mimeParts.length > 1 && mimeParts[1] ? mimeParts[1] : 'bin';
-            const filename = clipboardFile.name || `pasted-image-${Date.now()}.${extension}`;
+            const rawSubtype = mimeParts.length > 1 && mimeParts[1] ? mimeParts[1] : '';
+            const extension = rawSubtype.split(';')[0] || 'bin';
+            const uniquePart = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+            const filename = clipboardFile.name || `pasted-image-${uniquePart}.${extension}`;
             const imageFile = new File([clipboardFile], filename, { type: clipboardFile.type });
 
             const dataTransfer = new DataTransfer();
