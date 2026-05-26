@@ -638,6 +638,11 @@
         });
 
         document.addEventListener('paste', function(e) {
+            const target = e.target;
+            if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+                return;
+            }
+
             const clipboardItems = e.clipboardData?.items || [];
             const imageItem = Array.from(clipboardItems).find(item =>
                 typeof item.type === 'string' && item.type.startsWith('image/')
@@ -654,9 +659,16 @@
             e.preventDefault();
             setActiveTab('file');
 
-            const mimeParts = clipboardFile.type.split('/');
-            const rawSubtype = mimeParts.length > 1 && mimeParts[1] ? mimeParts[1] : '';
-            const extension = (rawSubtype.split(';')[0] || 'png');
+            const mimeToExt = {
+                'image/png': 'png',
+                'image/jpeg': 'jpg',
+                'image/webp': 'webp',
+                'image/gif': 'gif',
+                'image/bmp': 'bmp',
+                'image/svg+xml': 'svg',
+            };
+            const mimeType = clipboardFile.type.split(';')[0];
+            const extension = mimeToExt[mimeType] || 'png';
             const uniquePart = crypto.randomUUID();
             const filename = `pasted-image-${uniquePart}.${extension}`;
             const imageFile = new File([clipboardFile], filename, { type: clipboardFile.type });
