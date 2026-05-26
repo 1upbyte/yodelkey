@@ -657,14 +657,14 @@
                 return;
             }
 
-            e.preventDefault();
             if (typeof DataTransfer === 'undefined') {
-                resultDiv.className = 'result error';
-                resultDiv.style.display = 'block';
-                resultDiv.innerHTML = '<strong>Error:</strong> Your browser does not support pasting files here.';
+                setActiveTab('file');
+                fileInfo.textContent = 'Pasting files is not supported by your browser';
+                fileInfo.classList.add('file-error');
                 return;
             }
 
+            e.preventDefault();
             setActiveTab('file');
 
             const mimeToExt = {
@@ -677,7 +677,7 @@
             };
             const mimeType = clipboardFile.type.split(';')[0].trim() || 'image/png';
             const extension = mimeToExt[mimeType] || 'png';
-            const randomFallback = () => {
+            const generateNonUUIDIdentifier = () => {
                 if (typeof crypto.getRandomValues === 'function') {
                     const randomArray = new Uint32Array(1);
                     crypto.getRandomValues(randomArray);
@@ -687,7 +687,7 @@
             };
             const uniquePart = typeof crypto.randomUUID === 'function'
                 ? crypto.randomUUID()
-                : randomFallback();
+                : generateNonUUIDIdentifier();
             const filename = `pasted-image-${uniquePart}.${extension}`;
             const imageFile = new File([clipboardFile], filename, { type: mimeType });
 
