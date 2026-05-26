@@ -677,9 +677,17 @@
             };
             const mimeType = clipboardFile.type.split(';')[0].trim() || 'image/png';
             const extension = mimeToExt[mimeType] || 'png';
+            const randomFallback = () => {
+                if (typeof crypto.getRandomValues === 'function') {
+                    const randomArray = new Uint32Array(1);
+                    crypto.getRandomValues(randomArray);
+                    return `${Date.now()}-${randomArray[0]}`;
+                }
+                return `${Date.now()}-${Math.floor(Math.random() * RANDOM_FALLBACK_RANGE)}`;
+            };
             const uniquePart = typeof crypto.randomUUID === 'function'
                 ? crypto.randomUUID()
-                : `${Date.now()}-${Math.floor(Math.random() * RANDOM_FALLBACK_RANGE)}`;
+                : randomFallback();
             const filename = `pasted-image-${uniquePart}.${extension}`;
             const imageFile = new File([clipboardFile], filename, { type: mimeType });
 
