@@ -579,32 +579,35 @@
 
         const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB in bytes
 
+        function setActiveTab(type) {
+            tabs.forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.type === type);
+            });
+
+            typeInput.value = type;
+
+            if (type === 'file') {
+                contentGroup.classList.add('hidden');
+                fileGroup.classList.remove('hidden');
+                contentInput.removeAttribute('required');
+                fileInput.setAttribute('required', 'required');
+            } else {
+                contentGroup.classList.remove('hidden');
+                fileGroup.classList.add('hidden');
+                contentInput.setAttribute('required', 'required');
+                fileInput.removeAttribute('required');
+
+                if (type === 'url') {
+                    contentInput.placeholder = 'https://example.com';
+                } else {
+                    contentInput.placeholder = 'Enter your text here...';
+                }
+            }
+        }
+
         tabs.forEach(tab => {
             tab.addEventListener('click', function() {
-                // Update active tab
-                tabs.forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-
-                const type = this.dataset.type;
-                typeInput.value = type;
-
-                if (type === 'file') {
-                    contentGroup.classList.add('hidden');
-                    fileGroup.classList.remove('hidden');
-                    contentInput.removeAttribute('required');
-                    fileInput.setAttribute('required', 'required');
-                } else {
-                    contentGroup.classList.remove('hidden');
-                    fileGroup.classList.add('hidden');
-                    contentInput.setAttribute('required', 'required');
-                    fileInput.removeAttribute('required');
-                    
-                    if (type === 'url') {
-                        contentInput.placeholder = 'https://example.com';
-                    } else {
-                        contentInput.placeholder = 'Enter your text here...';
-                    }
-                }
+                setActiveTab(this.dataset.type);
             });
         });
 
@@ -632,6 +635,31 @@
                 fileInfo.textContent = '';
                 fileInfo.classList.remove('file-error');
             }
+        });
+
+        document.addEventListener('paste', function(e) {
+            const clipboardItems = e.clipboardData?.items || [];
+            const imageItem = Array.from(clipboardItems).find(item => item.type.startsWith('image/'));
+            if (!imageItem) {
+                return;
+            }
+
+            const clipboardFile = imageItem.getAsFile();
+            if (!clipboardFile) {
+                return;
+            }
+
+            e.preventDefault();
+            setActiveTab('file');
+
+            const extension = clipboardFile.type.split('/')[1] || 'png';
+            const filename = clipboardFile.name || `pasted-image-${Date.now()}.${extension}`;
+            const imageFile = new File([clipboardFile], filename, { type: clipboardFile.type });
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(imageFile);
+            fileInput.files = dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change'));
         });
 
         shareForm.addEventListener('submit', async function(e) {
