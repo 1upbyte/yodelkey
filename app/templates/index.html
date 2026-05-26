@@ -669,9 +669,18 @@
             };
             const mimeType = clipboardFile.type.split(';')[0];
             const extension = mimeToExt[mimeType] || 'png';
-            const uniquePart = crypto.randomUUID();
+            const uniquePart = crypto.randomUUID
+                ? crypto.randomUUID()
+                : `${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
             const filename = `pasted-image-${uniquePart}.${extension}`;
             const imageFile = new File([clipboardFile], filename, { type: clipboardFile.type });
+
+            if (typeof DataTransfer === 'undefined') {
+                resultDiv.className = 'result error';
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<strong>Error:</strong> Your browser does not support pasting files here.';
+                return;
+            }
 
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(imageFile);
