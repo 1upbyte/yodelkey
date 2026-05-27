@@ -578,33 +578,37 @@
         const fileInfo = document.getElementById('fileInfo');
 
         const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB in bytes
+        const RANDOM_FALLBACK_RANGE = 1_000_000;
+
+        function setActiveTab(type) {
+            tabs.forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.type === type);
+            });
+
+            typeInput.value = type;
+
+            if (type === 'file') {
+                contentGroup.classList.add('hidden');
+                fileGroup.classList.remove('hidden');
+                contentInput.removeAttribute('required');
+                fileInput.setAttribute('required', 'required');
+            } else {
+                contentGroup.classList.remove('hidden');
+                fileGroup.classList.add('hidden');
+                contentInput.setAttribute('required', 'required');
+                fileInput.removeAttribute('required');
+
+                if (type === 'url') {
+                    contentInput.placeholder = 'https://example.com';
+                } else {
+                    contentInput.placeholder = 'Enter your text here...';
+                }
+            }
+        }
 
         tabs.forEach(tab => {
             tab.addEventListener('click', function() {
-                // Update active tab
-                tabs.forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-
-                const type = this.dataset.type;
-                typeInput.value = type;
-
-                if (type === 'file') {
-                    contentGroup.classList.add('hidden');
-                    fileGroup.classList.remove('hidden');
-                    contentInput.removeAttribute('required');
-                    fileInput.setAttribute('required', 'required');
-                } else {
-                    contentGroup.classList.remove('hidden');
-                    fileGroup.classList.add('hidden');
-                    contentInput.setAttribute('required', 'required');
-                    fileInput.removeAttribute('required');
-                    
-                    if (type === 'url') {
-                        contentInput.placeholder = 'https://example.com';
-                    } else {
-                        contentInput.placeholder = 'Enter your text here...';
-                    }
-                }
+                setActiveTab(this.dataset.type);
             });
         });
 
@@ -632,6 +636,65 @@
                 fileInfo.textContent = '';
                 fileInfo.classList.remove('file-error');
             }
+        });
+
+        document.addEventListener('paste', function(e) {
+            const target = e.target;
+            if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+                return;
+            }
+
+            const clipboardItems = e.clipboardData?.items || [];
+            const imageItem = Array.from(clipboardItems).find(item =>
+                typeof item.type === 'string' && item.type.startsWith('image/')
+            );
+            if (!imageItem) {
+                return;
+            }
+
+            const clipboardFile = imageItem.getAsFile();
+            if (!clipboardFile) {
+                return;
+            }
+
+            if (typeof DataTransfer === 'undefined') {
+                setActiveTab('file');
+                fileInfo.textContent = 'Pasting files is not supported by your browser';
+                fileInfo.classList.add('file-error');
+                return;
+            }
+
+            e.preventDefault();
+            setActiveTab('file');
+
+            const mimeToExt = {
+                'image/png': 'png',
+                'image/jpeg': 'jpg',
+                'image/webp': 'webp',
+                'image/gif': 'gif',
+                'image/bmp': 'bmp',
+                'image/svg+xml': 'svg',
+            };
+            const mimeType = clipboardFile.type.split(';')[0].trim() || 'image/png';
+            const extension = mimeToExt[mimeType] || 'png';
+            const generateNonUUIDIdentifier = () => {
+                if (typeof crypto.getRandomValues === 'function') {
+                    const randomArray = new Uint32Array(1);
+                    crypto.getRandomValues(randomArray);
+                    return `${Date.now()}-${randomArray[0]}`;
+                }
+                return `${Date.now()}-${Math.floor(Math.random() * RANDOM_FALLBACK_RANGE)}`;
+            };
+            const uniquePart = typeof crypto.randomUUID === 'function'
+                ? crypto.randomUUID()
+                : generateNonUUIDIdentifier();
+            const filename = `pasted-image-${uniquePart}.${extension}`;
+            const imageFile = new File([clipboardFile], filename, { type: mimeType });
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(imageFile);
+            fileInput.files = dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change'));
         });
 
         shareForm.addEventListener('submit', async function(e) {
