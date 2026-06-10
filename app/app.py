@@ -1,5 +1,5 @@
 """Entrypoint for sharekey."""
-import random
+import secrets
 import threading
 import time
 from dataclasses import dataclass, field
@@ -94,59 +94,44 @@ def handle_key(key: str):
 
 @app.route("/create", methods=["GET", "POST"])
 def create_item():
-    """Create a new item."""
+    """Create a new item with inferred type."""
+    # 1. Check for file upload first (POST only)
+    if request.method == "POST" and "file" in request.files:
+        file = request.files["file"]
+        content = secure_filename(file.filename)
+        if not content:
+            return "No/invalid filename", 400
 
-    item_type_str = ""
+        item_type = ItemType.FILE
 
-    if request.method == "POST":
-        item_type_str = request.form.get("type", "").strip().lower()
-    if request.method == "GET":
-        if request.args.get("text"):
-            item_type_str = "text"
-        elif request.args.get("url"):
-            item_type_str = "url"
-    try:
-        item_type = ItemType(item_type_str)
-    except ValueError:
-        item_type = None
+    # 2. Otherwise, treat as Text or URL
+    else:
+        content = request.args.get("content")
 
-    match item_type:
-        case ItemType.URL | ItemType.TEXT:
-            if request.method == "GET":
-                content = request.args.get(item_type_str, "")
-            else:
-                content = request.form.get("content", "")
-            if not content:
-                return "Content required", 400
-            if item_type == ItemType.URL:
-                parsed = urlparse(content)
-                if parsed.scheme not in ["http", "https"]:
-                    return "Invalid URL scheme", 400
-                content = parsed.geturl()
-            item = Item(datetime.now(tz=UTC), item_type, content)
+        if not content:
+            return "Content required", 400
 
-        case ItemType.FILE:
-            if "file" not in request.files:
-                return "No file provided", 400
+        # Infer if it's a URL or Text
+        if content.startswith(("http://", "https://")):
+            item_type = ItemType.URL
+            parsed = urlparse(content)
+            content = parsed.geturl()
+        else:
+            item_type = ItemType.TEXT
 
-            file = request.files["file"]
-            safe_filename = secure_filename(file.filename)
-            if not safe_filename:
-                return "No/invalid filename", 400
+    # 3. Create item and save file if needed
+    item = Item(datetime.now(tz=UTC), item_type, content)
 
-            Path.mkdir(Path("./uploads"), exist_ok=True)
-            item = Item(datetime.now(tz=UTC), item_type, safe_filename)
-            file_path = f"./uploads/{item.uuid}"
-            file.save(file_path)
+    if item_type == ItemType.FILE:
+        Path("./uploads").mkdir(exist_ok=True)
+        file.save(f"./uploads/{item.uuid}")
 
-        case _:
-            return "Bad Request", 400
-
-    key = random.choice(word_list)  # noqa: S311
+    # 4. Generate key
+    key = secrets.choice(word_list)
     word_list.remove(key)
     items[key] = item
 
-    return key + "\n"
+    return f"{key}\n"
 
 def cleanup_old_items():
     """Remove items older than 5 minutes."""

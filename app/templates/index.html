@@ -701,8 +701,10 @@
             e.preventDefault();
             
             const formData = new FormData();
-            formData.append('type', typeInput.value);
+            const xhr = new XMLHttpRequest();
+            const url = new URL('/create', window.location.origin);
             
+
             if (typeInput.value === 'file') {
                 if (fileInput.files.length > 0) {
                     const file = fileInput.files[0];
@@ -717,8 +719,20 @@
                     formData.append('file', file);
                 }
             } else {
-                formData.append('content', contentInput.value);
+                url.searchParams.set('content', contentInput.value.trim());
             }
+
+            // Validate URL format
+            if (typeInput.value === 'url') {
+                const urlValue = contentInput.value.trim();
+                if (!urlValue.startsWith('http://') && !urlValue.startsWith('https://')) {
+                    resultDiv.className = 'result error';
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = '<strong>Error:</strong> URL must start with http:// or https://';
+                    return;
+                }
+            }
+
 
             try {
                 // Show progress bar for file uploads
@@ -730,7 +744,6 @@
                     uploadProgress.classList.add('active');
                 }
 
-                const xhr = new XMLHttpRequest();
                 
                 // Track upload progress
                 xhr.upload.addEventListener('progress', (e) => {
@@ -758,7 +771,7 @@
                     };
                     xhr.onerror = () => reject(new Error('Network error'));
                     
-                    xhr.open('POST', '/create');
+                    xhr.open('POST', url.toString());
                     xhr.send(formData);
                 });
 
