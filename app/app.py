@@ -93,10 +93,23 @@ def handle_key(key: str):
     return redirect("/404")
 
 @app.route("/create", methods=["GET", "POST"])
+@app.route("/create/<filename>", methods=["PUT"])
 def create_item():
     """Create a new item with inferred type."""
-    # 1. Check for file upload first (POST only)
-    if request.method == "POST" and "file" in request.files:
+    # 1. Check for file upload first
+    if request.method == "PUT" and filename:
+        content = secure_filename(filename)
+        if not content:
+            return "Invalid filename", 400
+            
+        item_type = ItemType.FILE
+        item = Item(datetime.now(tz=UTC), item_type, content)
+        
+        Path("./uploads").mkdir(exist_ok=True)
+        with open(f"./uploads/{item.uuid}", "wb") as f:
+            f.write(request.data)
+
+    elif request.method == "POST" and "file" in request.files:
         file = request.files["file"]
         content = secure_filename(file.filename)
         if not content:
