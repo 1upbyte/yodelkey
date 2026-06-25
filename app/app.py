@@ -93,12 +93,12 @@ def handle_key(key: str):
     return redirect("/404")
 
 @app.route("/create", methods=["GET", "POST", "PUT"])
-@app.route("/", methods=["POST"])
+@app.route("/", methods=["POST", "PUT"])
 @app.route("/<filename>", methods=["PUT"])
-def create_item(filename: str = ""):
+def create_item(filename: str = "no_filename"):
     """Create a new item with inferred type."""
     # 1. Check for file upload first
-    if request.method == "PUT" and filename:
+    if request.method == "PUT":
         content = secure_filename(filename)
         if not content:
             return "Content required", 400
