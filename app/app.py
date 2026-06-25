@@ -92,8 +92,9 @@ def handle_key(key: str):
                                  as_attachment=True)
     return redirect("/404")
 
-@app.route("/create", methods=["GET", "POST"])
-@app.route("/create/<filename>", methods=["PUT"])
+@app.route("/create", methods=["GET", "POST", "PUT"])
+@app.route("/", methods=["POST"])
+@app.route("/<filename>", methods=["PUT"])
 def create_item():
     """Create a new item with inferred type."""
     # 1. Check for file upload first
