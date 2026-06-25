@@ -95,27 +95,20 @@ def handle_key(key: str):
 @app.route("/create", methods=["GET", "POST", "PUT"])
 @app.route("/", methods=["POST"])
 @app.route("/<filename>", methods=["PUT"])
-def create_item():
+def create_item(filename: str = ""):
     """Create a new item with inferred type."""
     # 1. Check for file upload first
     if request.method == "PUT" and filename:
         content = secure_filename(filename)
         if not content:
-            return "Invalid filename", 400
-            
+            return "Content required", 400
         item_type = ItemType.FILE
-        item = Item(datetime.now(tz=UTC), item_type, content)
-        
-        Path("./uploads").mkdir(exist_ok=True)
-        with open(f"./uploads/{item.uuid}", "wb") as f:
-            f.write(request.data)
 
     elif request.method == "POST" and "file" in request.files:
         file = request.files["file"]
         content = secure_filename(file.filename)
         if not content:
             return "No/invalid filename", 400
-
         item_type = ItemType.FILE
 
     # 2. Otherwise, treat as Text or URL
@@ -138,7 +131,11 @@ def create_item():
 
     if item_type == ItemType.FILE:
         Path("./uploads").mkdir(exist_ok=True)
-        file.save(f"./uploads/{item.uuid}")
+        if request.method == "PUT":
+            with open(f"./uploads/{item.uuid}", "wb") as f:
+                f.write(request.data)
+        else:
+            file.save(f"./uploads/{item.uuid}")
 
     # 4. Generate key
     key = secrets.choice(word_list)
