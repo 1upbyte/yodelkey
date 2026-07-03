@@ -121,7 +121,7 @@
             min-height: 40px;
         }
 
-        select, input[type="text"], textarea, input[type="file"] {
+        select, input[type="text"], input[type="password"], textarea, input[type="file"] {
             width: 100%;
             padding: 12px 16px;
             background: #1a1a2e;
@@ -133,14 +133,20 @@
             font-family: inherit;
         }
 
-        select:focus, input[type="text"]:focus, textarea:focus, input[type="file"]:focus {
+        select:focus, input[type="text"]:focus, input[type="password"]:focus, textarea:focus, input[type="file"]:focus {
             outline: none;
             border-color: #a8d8ea;
             box-shadow: 0 0 0 3px rgba(168, 216, 234, 0.1);
         }
 
-        select:hover, input[type="text"]:hover, textarea:hover {
+        select:hover, input[type="text"]:hover, input[type="password"]:hover, textarea:hover {
             border-color: #4a4a6a;
+        }
+
+        .password-hint {
+            font-size: 0.7rem;
+            color: #7e7e9e;
+            margin-top: 6px;
         }
 
         textarea {
@@ -552,6 +558,11 @@
                 </div>
             </div>
 
+            <div class="form-group" id="passwordGroup">
+                <input type="password" id="passwordInput" name="pass" placeholder="Password (optional)" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore data-form-type="other">
+                <div class="password-hint">If set, the link will only work with the password.</div>
+            </div>
+
             <button type="submit">Create Share Link</button>
         </form>
 
@@ -576,6 +587,8 @@
         const shareForm = document.getElementById('shareForm');
         const resultDiv = document.getElementById('result');
         const fileInfo = document.getElementById('fileInfo');
+        const passwordGroup = document.getElementById('passwordGroup');
+        const passwordInput = document.getElementById('passwordInput');
 
         const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB in bytes
         const RANDOM_FALLBACK_RANGE = 1_000_000;
@@ -722,6 +735,11 @@
                 url.searchParams.set('content', contentInput.value.trim());
             }
 
+            const password = passwordInput.value;
+            if (password) {
+                url.searchParams.set('pass', password);
+            }
+
             // Validate URL format
             if (typeInput.value === 'url') {
                 const urlValue = contentInput.value.trim();
@@ -786,17 +804,19 @@
                 if (response.ok) {
                     resultDiv.className = 'result';
                     resultDiv.style.display = 'block';
-                    const fullUrl = window.location.origin + "/" + data;
+                    const keyValue = data.trim();
+                    const fullUrl = window.location.origin + "/" + keyValue;
                     resultDiv.innerHTML = `
                         <div class="result-main">
                             <div class="result-text">
                                 <div class="result-content">
                                     <span class="result-label">Key:</span>
-                                    <span class="share-key">${data}</span>
+                                    <span class="share-key">${keyValue}</span>
                                 </div>
                                 <div class="result-link">
-                                    <a href="${window.location.origin}/${data}" target="_blank">${window.location.origin}/${data}</a>
+                                    <a href="${fullUrl}" target="_blank">${fullUrl}</a>
                                 </div>
+                                ${password ? '<div class="password-hint">Password protected.</div>' : ''}
                             </div>
                             <div class="result-qr">
                                 <div id="qrcode"></div>
@@ -835,7 +855,8 @@
                             console.error('Failed to copy:', err);
                         }
                     });
-                    
+
+                    passwordInput.value = '';
                 } else {
                     resultDiv.className = 'result error';
                     resultDiv.style.display = 'block';

@@ -17,6 +17,7 @@ from flask import (
     request,
     send_file,
 )
+from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.serving import run_simple
 from werkzeug.utils import secure_filename
 
@@ -56,8 +57,21 @@ class Item:
     type: ItemType
     content: str
     uuid: UUID = field(default_factory=uuid4)
+    password_hash: str | None = None
 
 items: dict[str, Item] = {}
+
+def is_browser_request() -> bool:
+    """Guess whether the request came from a browser rather than a CLI tool."""
+    return "Mozilla" in request.headers.get("User-Agent", "")
+
+def get_supplied_password() -> str | None:
+    """Read the password from the query string, trying a few aliases."""
+    for param in ("pass", "code", "password"):
+        value = request.args.get(param)
+        if value:
+            return value
+    return None
 
 @app.get("/")
 def root():
@@ -78,19 +92,28 @@ def not_found():
 def handle_key(key: str):
     """Handle key (redirect, text, or file)."""
     item = items.get(key)
-    if item:
-        match item.type:
-            case ItemType.URL:
-                return redirect(item.content)
-            case ItemType.TEXT:
-                response = make_response(item.content)
-                response.headers["Content-Type"] = "text/plain"
-                return response
-            case ItemType.FILE:
-                file_path = f"./uploads/{item.uuid}"
-                return send_file(file_path, download_name=item.content,
-                                 as_attachment=True)
-    return redirect("/404")
+    if not item:
+        return redirect("/404")
+
+    if item.password_hash:
+        supplied = get_supplied_password()
+        if not supplied or not check_password_hash(item.password_hash, supplied):
+            if not is_browser_request():
+                return "Password incorrect", 403
+            wrong = supplied is not None
+            return render_template("password.html", wrong=wrong), 403
+
+    match item.type:
+        case ItemType.URL:
+            return redirect(item.content)
+        case ItemType.TEXT:
+            response = make_response(item.content)
+            response.headers["Content-Type"] = "text/plain"
+            return response
+        case ItemType.FILE:
+            file_path = f"./uploads/{item.uuid}"
+            return send_file(file_path, download_name=item.content,
+                             as_attachment=True)
 
 @app.route("/create", methods=["GET", "POST", "PUT"])
 @app.route("/", methods=["POST", "PUT"])
@@ -127,7 +150,10 @@ def create_item(filename: str = "no_filename"):
             item_type = ItemType.TEXT
 
     # 3. Create item and save file if needed
-    item = Item(datetime.now(tz=UTC), item_type, content)
+    password = get_supplied_password()
+    password_hash = generate_password_hash(password) if password else None
+    item = Item(datetime.now(tz=UTC), item_type, content,
+                password_hash=password_hash)
 
     if item_type == ItemType.FILE:
         Path("./uploads").mkdir(exist_ok=True)
