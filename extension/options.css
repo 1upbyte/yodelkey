@@ -6,8 +6,8 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: #1a1a2e;
-    color: #e0e0e0;
+    background: #201d1a;
+    color: #f2ede4;
     min-height: 100vh;
     display: flex;
     align-items: flex-start;
@@ -19,20 +19,21 @@ body {
 .container {
     width: 100%;
     max-width: 440px;
-    background: #252541;
-    border-radius: 16px;
+    background: #322e28;
+    border: 1px solid rgba(212, 180, 153, 0.15);
+    border-radius: 20px;
     padding: 32px;
 }
 
 h1 {
-    color: #a8d8ea;
+    color: #d4b499;
     font-size: 1.6rem;
     font-weight: 600;
     margin-bottom: 6px;
 }
 
 .subtitle {
-    color: #9e9e9e;
+    color: #a89e8f;
     font-size: 0.9rem;
     margin-bottom: 24px;
 }
@@ -40,7 +41,7 @@ h1 {
 label {
     display: block;
     font-size: 0.85rem;
-    color: #c0c0c0;
+    color: #d6cdbf;
     font-weight: 500;
     margin-bottom: 6px;
     text-transform: uppercase;
@@ -50,10 +51,10 @@ label {
 input[type="text"] {
     width: 100%;
     padding: 11px 14px;
-    background: #1a1a2e;
-    border: 2px solid #3a3a5a;
-    border-radius: 8px;
-    color: #e0e0e0;
+    background: #201d1a;
+    border: 2px solid #4a4438;
+    border-radius: 6px;
+    color: #f2ede4;
     font-size: 0.95rem;
     font-family: 'Courier New', monospace;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -61,42 +62,44 @@ input[type="text"] {
 
 input[type="text"]:focus {
     outline: none;
-    border-color: #a8d8ea;
-    box-shadow: 0 0 0 3px rgba(168, 216, 234, 0.1);
+    border-color: #d4b499;
+    box-shadow: 0 0 0 3px rgba(212, 180, 153, 0.1);
 }
 
 .hint {
     font-size: 0.8rem;
-    color: #7e7e9e;
+    color: #8a8172;
     margin-top: 8px;
     margin-bottom: 20px;
     line-height: 1.5;
 }
 
 .hint code {
-    background: #1a1a2e;
+    background: #201d1a;
     padding: 1px 6px;
     border-radius: 4px;
     font-size: 0.8rem;
-    color: #a8d8ea;
+    color: #d4b499;
 }
 
 button[type="submit"] {
     width: 100%;
     padding: 12px;
-    background: linear-gradient(135deg, #a8d8ea 0%, #8fc8de 100%);
-    color: #1a1a2e;
+    background: linear-gradient(135deg, #d4b499 0%, #c2a184 100%);
+    color: #262019;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 0.95rem;
     font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
 button[type="submit"]:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(168, 216, 234, 0.3);
+    box-shadow: 0 4px 16px rgba(212, 180, 153, 0.3);
 }
 
 button[type="submit"]:active {

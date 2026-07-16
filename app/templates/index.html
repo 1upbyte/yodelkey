@@ -14,7 +14,7 @@
         /* Custom scrollbar styling */
         * {
             scrollbar-width: thin;
-            scrollbar-color: #a8d8ea #1a1a2e;
+            scrollbar-color: #d4b499 #201d1a;
         }
 
         *::-webkit-scrollbar {
@@ -23,24 +23,26 @@
         }
 
         *::-webkit-scrollbar-track {
-            background: #1a1a2e;
+            background: #201d1a;
             border-radius: 4px;
         }
 
         *::-webkit-scrollbar-thumb {
-            background: #a8d8ea;
+            background: #d4b499;
             border-radius: 4px;
             transition: background 0.3s ease;
         }
 
         *::-webkit-scrollbar-thumb:hover {
-            background: #8fc8de;
+            background: #c2a184;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #1a1a2e;
-            color: #e0e0e0;
+            background:
+                linear-gradient(180deg, rgba(23, 20, 17, 0.35), rgba(23, 20, 17, 0.45)),
+                url('/static/wallpaper.jpg') center / cover fixed;
+            color: #f2ede4;
             height: 100vh;
             display: flex;
             align-items: center;
@@ -54,14 +56,17 @@
             width: 100%;
             max-width: 500px;
             max-height: 95vh;
-            background: #252541;
-            border-radius: 16px;
+            background: rgba(50, 46, 40, 0.92);
+            border: 1px solid rgba(212, 180, 153, 0.15);
+            border-radius: 20px;
             padding: 10px 40px 20px 40px;
             overflow-y: auto;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         h1 {
-            color: #a8d8ea;
+            color: #d4b499;
             font-size: 2rem;
             text-align: center;
             font-weight: 600;
@@ -70,7 +75,7 @@
 
         .subtitle {
             text-align: center;
-            color: #9e9e9e;
+            color: #a89e8f;
             font-size: 0.95rem;
         }
 
@@ -89,7 +94,7 @@
             display: flex;
             gap: 8px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #3a3a5a;
+            border-bottom: 2px solid #4a4438;
         }
 
         .tab {
@@ -98,7 +103,7 @@
             background: transparent;
             border: none;
             border-bottom: 3px solid transparent;
-            color: #9e9e9e;
+            color: #a89e8f;
             font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
@@ -108,12 +113,12 @@
         }
 
         .tab:hover {
-            color: #b0b0b0;
+            color: #c2b8a8;
         }
 
         .tab.active {
-            color: #a8d8ea;
-            border-bottom-color: #a8d8ea;
+            color: #d4b499;
+            border-bottom-color: #d4b499;
         }
 
         .form-group {
@@ -124,10 +129,10 @@
         select, input[type="text"], input[type="password"], textarea, input[type="file"] {
             width: 100%;
             padding: 12px 16px;
-            background: #1a1a2e;
-            border: 2px solid #3a3a5a;
-            border-radius: 8px;
-            color: #e0e0e0;
+            background: #201d1a;
+            border: 2px solid #4a4438;
+            border-radius: 6px;
+            color: #f2ede4;
             font-size: 1rem;
             transition: all 0.3s ease;
             font-family: inherit;
@@ -135,17 +140,17 @@
 
         select:focus, input[type="text"]:focus, input[type="password"]:focus, textarea:focus, input[type="file"]:focus {
             outline: none;
-            border-color: #a8d8ea;
-            box-shadow: 0 0 0 3px rgba(168, 216, 234, 0.1);
+            border-color: #d4b499;
+            box-shadow: 0 0 0 3px rgba(212, 180, 153, 0.1);
         }
 
         select:hover, input[type="text"]:hover, input[type="password"]:hover, textarea:hover {
-            border-color: #4a4a6a;
+            border-color: #5c5446;
         }
 
         .password-hint {
             font-size: 0.7rem;
-            color: #7e7e9e;
+            color: #8a8172;
             margin-top: 6px;
         }
 
@@ -160,8 +165,8 @@
         }
 
         input[type="file"]::file-selector-button {
-            background: #a8d8ea;
-            color: #1a1a2e;
+            background: #d4b499;
+            color: #262019;
             border: none;
             padding: 8px 16px;
             border-radius: 6px;
@@ -172,19 +177,21 @@
         }
 
         input[type="file"]::file-selector-button:hover {
-            background: #8fc8de;
+            background: #c2a184;
             transform: translateY(-1px);
         }
 
         button[type="submit"] {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #a8d8ea 0%, #8fc8de 100%);
-            color: #1a1a2e;
+            background: linear-gradient(135deg, #d4b499 0%, #c2a184 100%);
+            color: #262019;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 1rem;
             font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 8px;
@@ -192,7 +199,7 @@
 
         button[type="submit"]:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(168, 216, 234, 0.3);
+            box-shadow: 0 6px 20px rgba(212, 180, 153, 0.3);
         }
 
         button[type="submit"]:active {
@@ -202,9 +209,9 @@
         .result {
             margin-top: 16px;
             padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid #a8d8ea;
-            background: rgba(168, 216, 234, 0.1);
+            border-radius: 6px;
+            border-left: 4px solid #d4b499;
+            background: rgba(212, 180, 153, 0.1);
             display: none;
             animation: slideIn 0.3s ease;
         }
@@ -221,18 +228,18 @@
         }
 
         .result strong {
-            color: #a8d8ea;
+            color: #d4b499;
         }
 
         .result a {
-            color: #a8d8ea;
+            color: #d4b499;
             text-decoration: none;
             word-break: break-all;
             transition: color 0.3s ease;
         }
 
         .result a:hover {
-            color: #8fc8de;
+            color: #c2a184;
             text-decoration: underline;
         }
 
@@ -251,12 +258,12 @@
 
         .share-key {
             display: inline-block;
-            background: #1a1a2e;
+            background: #201d1a;
             padding: 4px 12px;
             border-radius: 6px;
             font-family: 'Courier New', monospace;
             font-size: 1rem;
-            color: #a8d8ea;
+            color: #d4b499;
             font-weight: 600;
             letter-spacing: 0.5px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -266,8 +273,8 @@
         }
 
         .share-key:hover {
-            background: #252541;
-            box-shadow: 0 4px 12px rgba(168, 216, 234, 0.3);
+            background: #322e28;
+            box-shadow: 0 4px 12px rgba(212, 180, 153, 0.3);
         }
 
         .share-key:hover::after {
@@ -294,7 +301,7 @@
 
         .result-label {
             font-size: 0.75rem;
-            color: #9e9e9e;
+            color: #a89e8f;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             display: inline-block;
@@ -346,7 +353,7 @@
 
         #qrcode:hover {
             transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(168, 216, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(212, 180, 153, 0.4);
         }
 
         #qrcode:hover::after {
@@ -390,7 +397,7 @@
         .qr-modal-content {
             background: white;
             padding: 20px;
-            border-radius: 16px;
+            border-radius: 20px;
             max-width: 90vw;
             max-height: 90vh;
             display: flex;
@@ -408,7 +415,7 @@
         }
 
         .qr-modal-close {
-            color: #9e9e9e;
+            color: #a89e8f;
             font-size: 0.85rem;
             text-align: center;
         }
@@ -419,14 +426,14 @@
 
         .copy-hint {
             font-size: 0.7rem;
-            color: #7e7e9e;
+            color: #8a8172;
             margin-top: 6px;
         }
 
         .file-info {
             margin-top: 8px;
             font-size: 0.85rem;
-            color: #9e9e9e;
+            color: #a89e8f;
         }
 
         .file-error {
@@ -446,7 +453,7 @@
         .progress-bar-container {
             width: 100%;
             height: 8px;
-            background: #1a1a2e;
+            background: #201d1a;
             border-radius: 4px;
             overflow: hidden;
             margin-bottom: 6px;
@@ -454,34 +461,34 @@
 
         .progress-bar {
             height: 100%;
-            background: linear-gradient(135deg, #a8d8ea 0%, #8fc8de 100%);
+            background: linear-gradient(135deg, #d4b499 0%, #c2a184 100%);
             width: 0%;
             transition: width 0.3s ease;
         }
 
         .progress-text {
             font-size: 0.75rem;
-            color: #9e9e9e;
+            color: #a89e8f;
             text-align: center;
         }
 
         .footer {
             margin-top: 16px;
             padding-top: 16px;
-            border-top: 1px solid #3a3a5a;
+            border-top: 1px solid #4a4438;
             text-align: center;
-            color: #9e9e9e;
+            color: #a89e8f;
             font-size: 0.85rem;
         }
 
         .footer a {
-            color: #a8d8ea;
+            color: #d4b499;
             text-decoration: none;
             transition: color 0.3s ease;
         }
 
         .footer a:hover {
-            color: #8fc8de;
+            color: #c2a184;
             text-decoration: underline;
         }
 
