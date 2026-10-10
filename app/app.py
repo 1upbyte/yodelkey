@@ -39,8 +39,52 @@ def create_preflight():
     """Handle CORS preflight for /create."""
     return "", 204
 
-with Path.open("words.txt") as f:
-    word_list = f.read().strip().split(",")
+WORDLIST_DIR = Path(__file__).resolve().parent / "wordlists"
+BASE_WORDLIST = "base.txt"
+DEFAULT_WALLPAPER = "wallpaper.jpg"
+
+SEASONAL_THEMES = {
+    # (month, day); the end is exclusive.
+    ((10, 1), (12, 1)): {
+        "file": "autumn.txt",
+        "wallpaper": "autumn.webp",
+    },
+}
+
+def current_theme() -> dict[str, str] | None:
+    """Find the theme active at the current local time."""
+    now = datetime.now()
+    timestamp = (now.month, now.day)
+    for (start, end), theme in SEASONAL_THEMES.items():
+        active = (start <= timestamp < end if start < end
+                  else timestamp >= start or timestamp < end)
+        if active:
+            return theme
+    return None
+
+def load_words(filename: str) -> list[str]:
+    """Load unique words from a comma-separated wordlist."""
+    return list(dict.fromkeys(
+        word.strip() for word in (WORDLIST_DIR / filename).read_text().split(",")
+        if word.strip()
+    ))
+
+seasonal_files = {theme["file"] for theme in SEASONAL_THEMES.values()}
+word_pools = {filename: load_words(filename) for filename in seasonal_files}
+seasonal_words = set().union(*(set(words) for words in word_pools.values()))
+word_pools[BASE_WORDLIST] = [
+    word for word in load_words(BASE_WORDLIST) if word not in seasonal_words
+]
+word_owner = {
+    word: filename for filename, words in word_pools.items() for word in words
+}
+word_lock = threading.Lock()
+
+@app.context_processor
+def seasonal_theme():
+    """Provide the current wallpaper to every rendered page."""
+    theme = current_theme()
+    return {"wallpaper": theme["wallpaper"] if theme else DEFAULT_WALLPAPER}
 
 class ItemType(StrEnum):
     """Enum for different types of items."""
@@ -163,10 +207,18 @@ def create_item(filename: str = "no_filename"):
         else:
             file.save(f"./uploads/{item.uuid}")
 
-    # 4. Generate key
-    key = secrets.choice(word_list)
-    word_list.remove(key)
-    items[key] = item
+    # 4. Use the seasonal wordlist first, then the base wordlist.
+    with word_lock:
+        theme = current_theme()
+        seasonal_pool = word_pools[theme["file"]] if theme else []
+        pool = seasonal_pool or word_pools[BASE_WORDLIST]
+        if not pool:
+            if item_type == ItemType.FILE:
+                Path(f"./uploads/{item.uuid}").unlink(missing_ok=True)
+            return "No keys available", 503
+        key = secrets.choice(pool)
+        pool.remove(key)
+        items[key] = item
 
     return f"{key}\n"
 
@@ -177,18 +229,19 @@ def cleanup_old_items():
         current_time = datetime.now(tz=UTC)
         keys_to_delete = []
 
-        for key, item in items.items():
-            age = current_time - item.creation_time
-            if age >= timedelta(minutes=5):
-                keys_to_delete.append(key)
+        with word_lock:
+            for key, item in items.items():
+                age = current_time - item.creation_time
+                if age >= timedelta(minutes=5):
+                    keys_to_delete.append(key)
 
-                if item.type == ItemType.FILE:
-                    file_path = f"./uploads/{item.uuid}"
-                    Path.unlink(file_path, missing_ok=True)
+                    if item.type == ItemType.FILE:
+                        file_path = f"./uploads/{item.uuid}"
+                        Path(file_path).unlink(missing_ok=True)
 
-        for key in keys_to_delete:
-            del items[key]
-            word_list.append(key)
+            for key in keys_to_delete:
+                del items[key]
+                word_pools[word_owner[key]].append(key)
 
 if __name__ == "__main__":
     cleanup_thread = threading.Thread(target=cleanup_old_items, daemon=True)
