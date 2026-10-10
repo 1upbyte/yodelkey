@@ -40,7 +40,7 @@ def create_preflight():
     return "", 204
 
 with Path.open("words.txt") as f:
-    word_list = f.read().split(",")
+    word_list = f.read().strip().split(",")
 
 class ItemType(StrEnum):
     """Enum for different types of items."""
