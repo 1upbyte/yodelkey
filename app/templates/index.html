@@ -258,17 +258,17 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transform-origin: center;
+            transition: transform 0.2s ease;
             margin-top: 8px;
         }
 
         button[type="submit"]:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(212, 180, 153, 0.3);
+            transform: scale(1.02);
         }
 
         button[type="submit"]:active {
-            transform: translateY(0);
+            transform: scale(0.98);
         }
 
         .result {
