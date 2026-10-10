@@ -165,8 +165,52 @@
             border-color: #5c5446;
         }
 
+        #passwordGroup {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         #passwordInput {
+            flex: 1;
+            min-width: 0;
             padding: 8px 12px;
+        }
+
+        .burn-button {
+            flex-shrink: 0;
+            align-self: stretch;
+            padding: 8px 10px;
+            background: #201d1a;
+            border: 2px solid #4a4438;
+            border-radius: 6px;
+            color: #f2ede4;
+            font-family: inherit;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            cursor: pointer;
+            transform-origin: center;
+            transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .burn-button:hover {
+            border-color: #d4b499;
+            transform: scale(1.04);
+        }
+
+        .burn-button:active {
+            transform: translateY(2px) scale(0.97);
+        }
+
+        .burn-button:focus-visible {
+            outline: 2px solid #d4b499;
+            outline-offset: 2px;
+        }
+
+        .burn-button[aria-pressed="true"] {
+            background: #4a4438;
+            border-color: #d4b499;
+            color: #d4b499;
         }
 
         .password-hint {
@@ -588,6 +632,7 @@
 
             <div class="form-group" id="passwordGroup">
                 <input type="password" id="passwordInput" name="pass" placeholder="Password (optional)" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore data-form-type="other">
+                <button type="button" id="burnAfterRead" class="burn-button" aria-pressed="false" title="Delete the item after its first successful opening">Burn after read</button>
             </div>
 
             <button type="submit">Create Share Link</button>
@@ -616,6 +661,12 @@
         const fileInfo = document.getElementById('fileInfo');
         const passwordGroup = document.getElementById('passwordGroup');
         const passwordInput = document.getElementById('passwordInput');
+        const burnAfterRead = document.getElementById('burnAfterRead');
+
+        burnAfterRead.addEventListener('click', () => {
+            const pressed = burnAfterRead.getAttribute('aria-pressed') === 'true';
+            burnAfterRead.setAttribute('aria-pressed', String(!pressed));
+        });
 
         const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB in bytes
         const RANDOM_FALLBACK_RANGE = 1_000_000;
@@ -766,6 +817,10 @@
             if (password) {
                 url.searchParams.set('pass', password);
             }
+            const burn = burnAfterRead.getAttribute('aria-pressed') === 'true';
+            if (burn) {
+                url.searchParams.set('burn', '1');
+            }
 
             // Validate URL format
             if (typeInput.value === 'url') {
@@ -844,6 +899,7 @@
                                     <a href="${fullUrl}" target="_blank">${fullUrl}</a>
                                 </div>
                                 ${password ? '<div class="password-hint">Password protected.</div>' : ''}
+                                ${burn ? '<div class="password-hint">Burns after first opening.</div>' : ''}
                             </div>
                             <div class="result-qr">
                                 <div id="qrcode"></div>
@@ -884,6 +940,7 @@
                     });
 
                     passwordInput.value = '';
+                    burnAfterRead.setAttribute('aria-pressed', 'false');
                 } else {
                     resultDiv.className = 'result error';
                     resultDiv.style.display = 'block';

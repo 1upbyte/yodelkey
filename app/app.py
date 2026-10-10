@@ -102,6 +102,7 @@ class Item:
     content: str
     uuid: UUID = field(default_factory=uuid4)
     password_hash: str | None = None
+    burn_after_read: bool = False
 
 items: dict[str, Item] = {}
 
@@ -147,6 +148,27 @@ def handle_key(key: str):
             wrong = supplied is not None
             return render_template("password.html", wrong=wrong), 403
 
+    if item.burn_after_read:
+        with word_lock:
+            # Another request may have consumed the key while password was checked.
+            if items.get(key) is not item:
+                return redirect("/404")
+            response = item_response(item)
+            del items[key]
+            word_pools[word_owner[key]].append(key)
+            if item.type == ItemType.FILE:
+                # Keep the open file available until the download finishes.
+                response.direct_passthrough = False
+
+                @response.call_on_close
+                def close_upload() -> None:
+                    Path(f"./uploads/{item.uuid}").unlink(missing_ok=True)
+            return response
+
+    return item_response(item)
+
+def item_response(item: Item):
+    """Return the stored URL, text, or file."""
     match item.type:
         case ItemType.URL:
             return redirect(item.content)
@@ -197,7 +219,8 @@ def create_item(filename: str = "no_filename"):
     password = get_supplied_password()
     password_hash = generate_password_hash(password) if password else None
     item = Item(datetime.now(tz=UTC), item_type, content,
-                password_hash=password_hash)
+                password_hash=password_hash,
+                burn_after_read=request.args.get("burn", "").lower() in {"1", "true"})
 
     if item_type == ItemType.FILE:
         Path("./uploads").mkdir(exist_ok=True)
