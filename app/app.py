@@ -48,6 +48,8 @@ SEASONAL_THEMES = {
     ((10, 1), (12, 1)): {
         "file": "autumn.txt",
         "wallpaper": "autumn.webp",
+        "author": "AnasAbdin",
+        "link": "https://steamcommunity.com/sharedfiles/filedetails/?id=3328819032",
     },
 }
 
@@ -84,7 +86,11 @@ word_lock = threading.Lock()
 def seasonal_theme():
     """Provide the current wallpaper to every rendered page."""
     theme = current_theme()
-    return {"wallpaper": theme["wallpaper"] if theme else DEFAULT_WALLPAPER}
+    return {
+        "wallpaper": theme["wallpaper"] if theme else DEFAULT_WALLPAPER,
+        "wallpaper_link": theme["link"] if theme else "",
+        "wallpaper_author": theme["author"] if theme else "",
+    }
 
 class ItemType(StrEnum):
     """Enum for different types of items."""
