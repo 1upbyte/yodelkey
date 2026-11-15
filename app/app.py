@@ -1,4 +1,5 @@
 """Entrypoint for sharekey."""
+import os
 import secrets
 import threading
 import time
@@ -145,6 +146,10 @@ def handle_key(key: str):
     item = items.get(key)
     if not item:
         return redirect("/404")
+
+    if (item.type == ItemType.FILE and not request.is_secure
+            and "YODELKEY_NO_HTTPS" not in os.environ):
+        return redirect(request.url.replace("http://", "https://", 1))
 
     if item.password_hash:
         supplied = get_supplied_password()
