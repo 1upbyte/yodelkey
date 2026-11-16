@@ -1,5 +1,4 @@
 """Entrypoint for sharekey."""
-import os
 import secrets
 import threading
 import time
@@ -7,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum, auto
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlencode, urlparse
 from uuid import UUID, uuid4
 
 from flask import (
@@ -17,14 +16,13 @@ from flask import (
     render_template,
     request,
     send_file,
+    url_for,
 )
-from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.serving import run_simple
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100MB
 
 
@@ -149,10 +147,6 @@ def handle_key(key: str):
     if not item:
         return redirect("/404")
 
-    if (item.type == ItemType.FILE and not request.is_secure
-            and "YODELKEY_NO_HTTPS" not in os.environ):
-        return redirect(request.url.replace("http://", "https://", 1))
-
     if item.password_hash:
         supplied = get_supplied_password()
         if not supplied or not check_password_hash(item.password_hash, supplied):
@@ -160,6 +154,18 @@ def handle_key(key: str):
                 return "Password incorrect", 403
             wrong = supplied is not None
             return render_template("password.html", wrong=wrong), 403
+
+    if (item.type == ItemType.FILE and is_browser_request()
+            and request.args.get("download") != "1"):
+        # Rendering the page must not consume a burn-after-read file.
+        params = request.args.copy()
+        params["download"] = "1"
+        download_url = url_for("handle_key", key=key) + "?" + urlencode(list(params.items(multi=True)))
+        response = make_response(render_template(
+            "download.html", filename=item.content, download_url=download_url,
+        ))
+        response.headers["Cache-Control"] = "no-store"
+        return response
 
     if item.burn_after_read:
         with word_lock:
@@ -191,8 +197,10 @@ def item_response(item: Item):
             return response
         case ItemType.FILE:
             file_path = f"./uploads/{item.uuid}"
-            return send_file(file_path, download_name=item.content,
-                             as_attachment=True)
+            response = send_file(file_path, download_name=item.content,
+                                 as_attachment=True)
+            response.headers["Cache-Control"] = "no-store"
+            return response
 
 @app.route("/create", methods=["GET", "POST", "PUT"])
 @app.route("/", methods=["POST", "PUT"])

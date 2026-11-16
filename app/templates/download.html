@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Download - YodelKey</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #171411;
+            isolation: isolate;
+            color: #f2ede4;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            line-height: 1.6;
+        }
+        body::before, body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+        body::before {
+            z-index: -2;
+            background: url("{{ url_for('static', filename=wallpaper) }}") center / cover;
+            {% if wallpaper == 'autumn.webp' %}image-rendering: pixelated;{% endif %}
+        }
+        body::after {
+            z-index: -1;
+            background: linear-gradient(180deg, rgba(23, 20, 17, 0.35), rgba(23, 20, 17, 0.45));
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(50, 46, 40, 0.92);
+            border: 1px solid rgba(212, 180, 153, 0.15);
+            border-radius: 20px;
+            padding: 30px 40px;
+            text-align: center;
+            overflow-wrap: anywhere;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        h1 { color: #d4b499; font-size: 1.5rem; margin: 0 0 8px; }
+        p { color: #a89e8f; font-size: 0.9rem; }
+        a { color: #d4b499; }
+    </style>
+    <script src="{{ url_for('static', filename='download.js') }}" defer></script>
+</head>
+<body>
+    <main class="container">
+        <h1>{{ filename }}</h1>
+        <p id="status" role="status">Preparing your download…</p>
+        <a id="download" href="{{ download_url }}"
+           data-filename="{{ filename }}" data-worker="{{ url_for('static', filename='download-worker.js') }}">Direct download</a>
+        <noscript><p>JavaScript is disabled. Use the direct download link above.</p></noscript>
+    </main>
+</body>
+</html>

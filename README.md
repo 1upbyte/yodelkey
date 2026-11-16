@@ -8,12 +8,12 @@ share URLs, text, files and more, easily
 2. cd into the `app` directory
 3. `uv run app.py`
 
-File retrieval redirects HTTP requests to HTTPS before authentication or download.
-Behind a reverse proxy, set `X-Forwarded-Proto` to the original request scheme.
-The app trusts one proxy for this header; restrict backend access to that proxy,
-which must overwrite any client-supplied value.
-Set `YODELKEY_NO_HTTPS` (even to an empty value) to disable this, e.g.
-`YODELKEY_NO_HTTPS=1 uv run app.py` for local HTTP development.
+Browser file links open a download page that fetches the file in a background
+Web Worker and saves it through a blob URL, working around
+[Chromium's HTTP/HSTS download warning](https://issues.chromium.org/issues/584973367).
+Clients such as curl receive the file directly. Use `?download=1` for a direct
+download in a browser without JavaScript. Passwords are still required, and
+burn-after-read files are consumed when the file is fetched, not when the page opens.
 
 > [!NOTE]
 > This project was almost entirely vibe-coded in a very short amount of time. I would only run this in a sandboxed environment.
